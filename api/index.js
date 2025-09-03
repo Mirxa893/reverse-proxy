@@ -8,9 +8,10 @@ const CACHE_DURATION = 7 * 24 * 60 * 60 * 1000;
 const FRAMER_SITE_URL = process.env.FRAMER_SITE_URL || 'https://your-framer-site.framer.website';
 
 // Function to generate domain-aware cache key
-function generateDomainAwareCacheKey(path, domain) {
-  const domainHash = domain.replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
-  return `framer-cache:${domainHash}:${path}`;
+function generateDomainAwareCacheKey(path, framerDomain, incomingDomain) {
+  const framerDomainHash = framerDomain.replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
+  const incomingDomainHash = incomingDomain.replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
+  return `framer-cache:${framerDomainHash}:${incomingDomainHash}:${path}`;
 }
 
 // Function to remove ONLY Framer branding - MINIMAL APPROACH
@@ -134,10 +135,14 @@ export default async function handler(req, res) {
       `);
     }
     
+    // Get the incoming domain from request headers
+    const incomingDomain = req.headers.host || 'unknown';
     // Create domain-aware cache key
-    const cacheKey = generateDomainAwareCacheKey('root', FRAMER_SITE_URL);
+    const cacheKey = generateDomainAwareCacheKey('root', FRAMER_SITE_URL, incomingDomain);
     
     console.log(`Processing request: ${req.method} ${req.url}`);
+    console.log(`Incoming domain: "${incomingDomain}"`);
+    console.log(`Framer domain: "${FRAMER_SITE_URL}"`);
     console.log(`Cache key: "${cacheKey}"`);
 
     // Manual cache clear
