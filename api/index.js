@@ -7,6 +7,12 @@ const CACHE_DURATION = 7 * 24 * 60 * 60 * 1000;
 // Your Framer site URL
 const FRAMER_SITE_URL = process.env.FRAMER_SITE_URL || 'https://your-framer-site.framer.website';
 
+// Function to generate domain-aware cache key
+function generateDomainAwareCacheKey(path, domain) {
+  const domainHash = domain.replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
+  return `framer-cache:${domainHash}:${path}`;
+}
+
 // Function to remove ONLY Framer branding - MINIMAL APPROACH
 function removeFramerBranding(content, contentType) {
   if (!contentType || !contentType.includes('text/html')) {
@@ -128,9 +134,11 @@ export default async function handler(req, res) {
       `);
     }
     
-    const cacheKey = `framer-cache:root`;
+    // Create domain-aware cache key
+    const cacheKey = generateDomainAwareCacheKey('root', FRAMER_SITE_URL);
     
     console.log(`Processing request: ${req.method} ${req.url}`);
+    console.log(`Cache key: "${cacheKey}"`);
 
     // Manual cache clear
     if (req.query.clear_cache === 'true') {
