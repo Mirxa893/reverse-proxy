@@ -71,11 +71,12 @@ function removeFramerBranding(content, contentType) {
 }
 
 // Function to generate cache key with domain awareness
-function generateCacheKey(path, query, domain) {
+function generateCacheKey(path, query, framerDomain, incomingDomain) {
   const queryString = query ? `?${new URLSearchParams(query).toString()}` : '';
-  // Create a clean domain hash for cache key (remove special chars, keep alphanumeric)
-  const domainHash = domain.replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
-  return `framer-cache:${domainHash}:${path}${queryString}`;
+  // Create clean domain hashes for cache key (remove special chars, keep alphanumeric)
+  const framerDomainHash = framerDomain.replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
+  const incomingDomainHash = incomingDomain.replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
+  return `framer-cache:${framerDomainHash}:${incomingDomainHash}:${path}${queryString}`;
 }
 
 // Function to check if cache is valid
@@ -144,9 +145,13 @@ export default async function handler(req, res) {
     const { '...path': _, clear_cache, ...queryParams } = req.query;
     const fullPath = Array.isArray(pathParam) ? pathParam.join('/') : (pathParam || '');
     const queryString = new URLSearchParams(queryParams).toString();
-    const cacheKey = generateCacheKey(fullPath, queryParams, FRAMER_SITE_URL);
+    // Get the incoming domain from request headers
+    const incomingDomain = req.headers.host || 'unknown';
+    const cacheKey = generateCacheKey(fullPath, queryParams, FRAMER_SITE_URL, incomingDomain);
     
     console.log(`Processing request: ${req.method} ${req.url}`);
+    console.log(`Incoming domain: "${incomingDomain}"`);
+    console.log(`Framer domain: "${FRAMER_SITE_URL}"`);
     console.log(`Path param: "${pathParam}"`);
     console.log(`Full path: "${fullPath}"`);
     console.log(`Query string: "${queryString}"`);
