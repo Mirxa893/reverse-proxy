@@ -1,0 +1,26 @@
+{
+  "name": "framer-reverse-proxy",
+  "version": "1.0.0",
+  "description": "Professional reverse proxy for Framer sites with caching and branding removal",
+  "main": "index.js",
+  "scripts": {
+    "dev": "vercel dev",
+    "build": "echo 'No build step required'",
+    "start": "echo 'Deploy to Vercel'"
+  },
+  "dependencies": {
+    "@vercel/blob": "^1.1.1",
+    "node-fetch": "^2.7.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "keywords": [
+    "framer",
+    "reverse-proxy",
+    "vercel",
+    "caching"
+  ],
+  "author": "",
+  "license": "MIT"
+}
