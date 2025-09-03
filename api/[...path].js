@@ -70,10 +70,12 @@ function removeFramerBranding(content, contentType) {
   return modifiedContent;
 }
 
-// Function to generate cache key
-function generateCacheKey(path, query) {
+// Function to generate cache key with domain awareness
+function generateCacheKey(path, query, domain) {
   const queryString = query ? `?${new URLSearchParams(query).toString()}` : '';
-  return `framer-cache:${path}${queryString}`;
+  // Create a clean domain hash for cache key (remove special chars, keep alphanumeric)
+  const domainHash = domain.replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
+  return `framer-cache:${domainHash}:${path}${queryString}`;
 }
 
 // Function to check if cache is valid
@@ -142,12 +144,13 @@ export default async function handler(req, res) {
     const { '...path': _, clear_cache, ...queryParams } = req.query;
     const fullPath = Array.isArray(pathParam) ? pathParam.join('/') : (pathParam || '');
     const queryString = new URLSearchParams(queryParams).toString();
-    const cacheKey = generateCacheKey(fullPath, queryParams);
+    const cacheKey = generateCacheKey(fullPath, queryParams, FRAMER_SITE_URL);
     
     console.log(`Processing request: ${req.method} ${req.url}`);
     console.log(`Path param: "${pathParam}"`);
     console.log(`Full path: "${fullPath}"`);
     console.log(`Query string: "${queryString}"`);
+    console.log(`Cache key: "${cacheKey}"`);
 
     // Check for manual cache clear
     if (req.query.clear_cache === 'true') {
